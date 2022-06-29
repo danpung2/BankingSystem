@@ -16,9 +16,9 @@ public class BankingApplication {
         System.out.println("충전 시 급여에서 차감되며 환급은 되지 않습니다.");
         System.out.println("문의사항은 000-0000-0000으로 문의바랍니다.");
         System.out.println("-----------------------------------------------");
-        System.out.println("1. 회원가입 2. 로그인 9. 관리자 0. 종료");
 
         while (menu != 0){
+            System.out.println("1. 회원가입 2. 로그인 9. 관리자 0. 종료");
             menu = scanner.nextInt();
             if(menu == 1){
 
