@@ -3,8 +3,11 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Scanner;
 
+import DB.JdbcConnect;
+
 public class BankingApplication {
     public static void main(String[] args){
+        final String ERROR = "오류가 발생했습니다. 문제가 반복되면 관리자에게 문의해주세요.";
         Scanner scanner = new Scanner(System.in);
         int menu = -1;
         int userId = -1;
@@ -16,17 +19,14 @@ public class BankingApplication {
         System.out.println("충전 시 급여에서 차감되며 환급은 되지 않습니다.");
         System.out.println("문의사항은 000-0000-0000으로 문의바랍니다.");
         System.out.println("-----------------------------------------------");
-        System.out.println("1. 회원가입 2. 로그인 9. 관리자 0. 종료");
 
         while (menu != 0){
+            menu = 0;
+            System.out.println("1. 회원가입 2. 로그인 9. 관리자 0. 종료");
             menu = scanner.nextInt();
             if(menu == 1){
 
                 registerPage();
-
-                userId = loginPage();
-                if(userId != -1)
-                    afterLoginPage(userId);
 
             } else if(menu == 2){
 
@@ -40,13 +40,14 @@ public class BankingApplication {
                 if(userId != -1)
                     adminPage(userId);
 
+            } else if(menu == 0) {
+                System.out.println("시스템 종료중..");
+                break;
             } else {
                 System.out.println("다시 입력해주세요.");
             }
         }
-
-        System.out.println("시스템 종료중..");
-        System.out.println("시스템이 종료됩니다.");
+        System.out.println("프로그램이 종료됩니다.");
         System.out.println("-----------------------------------------------");
 
     }
@@ -71,6 +72,12 @@ public class BankingApplication {
         encodedPassword = String.format("%064x", new BigInteger(1, md.digest()));
 
         // DB에 저장
+        JdbcConnect jdbcConnect = new JdbcConnect();
+        boolean status = jdbcConnect.insertMember(name, employeeId, encodedPassword);
+
+        if(status) {
+            System.out.println("등록되었습니다. 승인 처리까지는 1~3일이 소요됩니다. 문의사항은 관리자에게 문의해주세요.");
+        }
     }
 
     public static int loginPage() {
@@ -187,6 +194,17 @@ public class BankingApplication {
         }
 
     }
+
+    public static void selectFromDb(){
+
+    }
+
+    public static void insertToDb(){
+
+    }
+
+
+
 }
 
 
