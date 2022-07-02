@@ -22,7 +22,7 @@ public class BankingApplication {
 
         while (menu != 0){
             menu = 0;
-            System.out.println("1. 회원가입 2. 로그인 9. 관리자 0. 종료");
+            System.out.println("1. 회원가입 2. 로그인 0. 종료");
             menu = scanner.nextInt();
             if(menu == 1){
 
@@ -34,12 +34,6 @@ public class BankingApplication {
                 if(userId != -1)
                     afterLoginPage(userId);
                 menu = 0;
-
-            } else if(menu == 9) {
-
-                userId = loginAdminPage();
-                if(userId != -1)
-                    adminPage(userId);
 
             } else if(menu == 0) {
                 System.out.println("시스템 종료중..");
@@ -136,71 +130,6 @@ public class BankingApplication {
         }
     }
 
-    public static int loginAdminPage(){
-        Scanner scanner = new Scanner(System.in);
-        boolean isAdmin = false;
-        boolean isLogin = false;
-        String employeeId, password, encodedPassword;
-        MessageDigest md = null;
-        int userId = -1;
-
-        try {
-            md = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-
-        System.out.println("----------------------관리자---------------------");
-        System.out.println("사번을 입력해주세요.");
-        employeeId = scanner.nextLine();
-        System.out.println("비밀번호를 입력해주세요.");
-        password = scanner.nextLine();
-        md.update(password.getBytes());
-        encodedPassword = String.format("%064x", new BigInteger(1, md.digest()));
-
-        // DB와 확인
-        // 사번, 비밀번호가 일치하고 승인 상태면 로그인 / 아니면 종료
-
-        if(isLogin && isAdmin){
-            // DB에서 userId 가져오기
-        } else if(isLogin){
-            System.out.println("관리자 권한이 없습니다. 관리자에게 문의해주세요.");
-        } else {
-            System.out.println("로그인에 실패했습니다. 사번과 비밀번호를 확인해주세요.");
-        }
-        return userId;
-    }
-
-    public static void adminPage(int userId){
-        // DB에서 userId로 정보 가져오기
-        Scanner scanner = new Scanner(System.in);
-        int menu = -1;
-        while(menu != 0){
-            System.out.println("1. 회원 조회 2. 승인 대기 조회 3. 승인 여부 수정 4. 회원 삭제 0. 종료");
-            menu = scanner.nextInt();
-
-            if(menu == 1){
-
-            } else if(menu == 2){
-
-            } else if(menu == 3){
-
-            } else if(menu == 4){
-
-            } else {
-
-            }
-        }
-
-    }
-
-    public static void selectFromDb(){
-
-    }
-
-    public static void insertToDb(){
-
-    }
 
 
 
