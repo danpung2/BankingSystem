@@ -1,15 +1,10 @@
-package DB;
+package db;
 
-import org.yaml.snakeyaml.Yaml;
-
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Date;
-import java.util.Map;
+import java.io.Reader;
+import java.sql.*;
+import java.time.LocalDateTime;
+import java.util.Properties;
 
 public class JdbcConnect {
     private String server;
@@ -17,22 +12,17 @@ public class JdbcConnect {
     private String password;
 
     public JdbcConnect() {
-        Map<String, Object> propMap = null;
-        try {
-            propMap = new Yaml().load(new FileReader("src/db.yml"));
-        } catch (FileNotFoundException e) {
-            System.out.println("오류가 발생했습니다. 문제가 반복되면 관리자에게 문의해주세요.");
-        }
-        server = (String) propMap.get("server");
-        userName = (String) propMap.get("user_name");
-        password = (String) propMap.get("password");
-//        setServer((String) propMap.get("server"));
-//        setUserName((String) propMap.get("user_name"));
-//        setPassword((String) propMap.get("password"));
 
         try {
+            FileReader dbConfig= new FileReader("src/config/db.properties");
+            Properties properties = new Properties();
+
+            properties.load(dbConfig);
+            server = properties.getProperty("server");
+            userName = properties.getProperty("user_name");
+            password = properties.getProperty("password");
             Class.forName("com.mysql.cj.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
+        } catch (Exception e) {
             System.out.println("오류가 발생했습니다. 문제가 반복되면 관리자에게 문의해주세요.");
         }
     }
@@ -50,8 +40,8 @@ public class JdbcConnect {
     }
 
     public boolean insertMember(String name, String employeeId, String password) {
-        String sql = " INSERT INTO Member(NAME, EMPLOYEE_ID, PASSWORD) "
-                + " VALUES(?, ?, ?) ";
+        String sql = " INSERT INTO Member(NAME, EMPLOYEE_ID, PASSWORD. CREATE_DATE) "
+                + " VALUES(?, ?, ?, ?) ";
 
         Connection connection = getConnection();
         PreparedStatement preparedStatement = null;
@@ -59,10 +49,13 @@ public class JdbcConnect {
         int count = 0;
 
         try {
+            Timestamp timestamp = Timestamp.valueOf(LocalDateTime.now());
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, name);
             preparedStatement.setString(2, employeeId);
             preparedStatement.setString(3, password);
+            preparedStatement.setTimestamp(4, timestamp);
+
             count = preparedStatement.executeUpdate();
 
         } catch (SQLException e) {
@@ -84,6 +77,42 @@ public class JdbcConnect {
         }
         return count > 0 ? true : false;
     }
+
+    public int selectMember(String employeeId, String password){
+        String sql = " SELECT * FROM member WHERE EMPLOYEE_ID = " + employeeId + " ";
+
+        PreparedStatement preparedStatement = null;
+        Connection connection = getConnection();
+        ResultSet selectResult = null;
+
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            selectResult = preparedStatement.executeQuery();
+            if(selectResult.next())
+                if(selectResult.getString("PASSWORD").equalsIgnoreCase(password)){
+                    return selectResult.getInt("ID");
+                }
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // DB close
+        try {
+            if(connection != null) {
+                connection.close();
+            }
+            if(preparedStatement != null) {
+                preparedStatement.close();
+            }
+        } catch (SQLException e) {
+        }
+        return -1;
+    }
+
+
+
     public String getServer() {
         return server;
     }

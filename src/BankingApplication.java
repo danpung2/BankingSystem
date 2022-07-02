@@ -3,7 +3,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Scanner;
 
-import DB.JdbcConnect;
+import db.JdbcConnect;
 
 public class BankingApplication {
     public static void main(String[] args){
@@ -33,6 +33,7 @@ public class BankingApplication {
                 userId = loginPage();
                 if(userId != -1)
                     afterLoginPage(userId);
+                menu = 0;
 
             } else if(menu == 9) {
 
@@ -76,14 +77,12 @@ public class BankingApplication {
         boolean status = jdbcConnect.insertMember(name, employeeId, encodedPassword);
 
         if(status) {
-            System.out.println("등록되었습니다. 승인 처리까지는 1~3일이 소요됩니다. 문의사항은 관리자에게 문의해주세요.");
+            System.out.println("등록되었습니다.");
         }
     }
 
     public static int loginPage() {
         Scanner scanner = new Scanner(System.in);
-        boolean isAccept = false;
-        boolean isLogin = false;
         int userId = -1;
         String employeeId, password, encodedPassword;
         MessageDigest md = null;
@@ -102,14 +101,14 @@ public class BankingApplication {
         encodedPassword = String.format("%064x", new BigInteger(1, md.digest()));
 
         // DB와 확인
+        JdbcConnect jdbcConnect = new JdbcConnect();
+        userId = jdbcConnect.selectMember(employeeId, password);
         // 사번, 비밀번호가 일치하고 승인 상태면 로그인 / 아니면 종료
 
-        if(isLogin && isAccept){
-            // userId에 로그인 정보 가져오기
-
-        } else if(isLogin){
-            System.out.println("승인 처리 중입니다. 관리자에게 문의해주세요.");
-        } else {
+        if(userId != 1){
+            return userId;
+        }
+        else {
             System.out.println("로그인에 실패했습니다. 사번과 비밀번호를 확인해주세요.");
         }
         return userId;
