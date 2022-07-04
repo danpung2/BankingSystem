@@ -96,29 +96,33 @@ public class BankingApplication {
 
         // DB와 확인
         JdbcConnect jdbcConnect = new JdbcConnect();
-        userId = jdbcConnect.selectMember(employeeId, password);
+        userId = jdbcConnect.selectMemberByEmployeeId(employeeId, encodedPassword);
         // 사번, 비밀번호가 일치하고 승인 상태면 로그인 / 아니면 종료
 
-        if(userId != 1){
-            return userId;
-        }
-        else {
+        if(userId == -1){
             System.out.println("로그인에 실패했습니다. 사번과 비밀번호를 확인해주세요.");
         }
         return userId;
     }
 
     public static void afterLoginPage(int userId){
-        // DB에서 userId로 정보 가져오기
         Scanner scanner = new Scanner(System.in);
         int menu = -1;
         while(menu != 0){
-            System.out.println("1. NJ 조회 2. NJ 충전 3. NJ 선물 4. 이용 내역 5. 정보 수정 0. 종료");
+            System.out.println("1. NJ 조회 2. NJ 충전 3. NJ 선물 0. 종료");
             menu = scanner.nextInt();
 
             if(menu == 1){
+                JdbcConnect jdbcConnect = new JdbcConnect();
+                System.out.println(jdbcConnect.selectBalanceByUserId(userId));
 
             } else if(menu == 2){
+                System.out.println("충전할 NJ를 입력해주세요.");
+                int charging;
+                charging = scanner.nextInt();
+                JdbcConnect jdbcConnect = new JdbcConnect();
+                jdbcConnect.updateBalanceByUserId(userId, charging);
+                System.out.println("충전이 완료되었습니다.");
 
             } else if(menu == 3){
 

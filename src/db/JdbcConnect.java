@@ -40,7 +40,7 @@ public class JdbcConnect {
     }
 
     public boolean insertMember(String name, String employeeId, String password) {
-        String sql = " INSERT INTO Member(NAME, EMPLOYEE_ID, PASSWORD. CREATE_DATE) "
+        String sql = " INSERT INTO Member(NAME, EMPLOYEE_ID, PASSWORD, CREATE_DATE) "
                 + " VALUES(?, ?, ?, ?) ";
 
         Connection connection = getConnection();
@@ -78,7 +78,7 @@ public class JdbcConnect {
         return count > 0 ? true : false;
     }
 
-    public int selectMember(String employeeId, String password){
+    public int selectMemberByEmployeeId(String employeeId, String password){
         String sql = " SELECT * FROM member WHERE EMPLOYEE_ID = " + employeeId + " ";
 
         PreparedStatement preparedStatement = null;
@@ -111,29 +111,76 @@ public class JdbcConnect {
         return -1;
     }
 
+    public int selectBalanceByUserId(int userId){
+        String sql = " SELECT * FROM MEMBER WHERE id = " + userId + " ";
 
+        PreparedStatement preparedStatement = null;
+        Connection connection = getConnection();
+        ResultSet selectResult = null;
 
-    public String getServer() {
-        return server;
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            selectResult = preparedStatement.executeQuery();
+            if(selectResult.next()){
+                return selectResult.getInt("BALANCE");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // DB close
+        try {
+            if(connection != null) {
+                connection.close();
+            }
+            if(preparedStatement != null) {
+                preparedStatement.close();
+            }
+        } catch (SQLException e) {
+        }
+        return -1;
     }
 
-    public void setServer(String server) {
-        this.server = server;
+    public boolean updateBalanceByUserId(int userId, int charging){
+        int balance = 0;
+        int count = 0;
+
+        String selectSql = " SELECT * FROM MEMBER WHERE id = " + userId + " ";
+
+
+        PreparedStatement preparedStatement = null;
+        Connection connection = getConnection();
+        ResultSet selectResult = null;
+
+        try {
+            preparedStatement = connection.prepareStatement(selectSql);
+            selectResult = preparedStatement.executeQuery();
+            if(selectResult.next()){
+                balance = selectResult.getInt("Balance");
+                balance += charging;
+            }
+            String updateSql = " UPDATE Member SET BALANCE = " + balance + " WHERE id = " + userId  + " ";
+            preparedStatement = connection.prepareStatement(updateSql);
+            count = preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // DB close
+        try {
+            if(connection != null) {
+                connection.close();
+            }
+            if(preparedStatement != null) {
+                preparedStatement.close();
+            }
+        } catch (SQLException e) {
+        }
+
+        return count > 0 ? true : false;
     }
 
-    public String getUserName() {
-        return userName;
-    }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }
