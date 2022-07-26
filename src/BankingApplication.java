@@ -67,12 +67,17 @@ public class BankingApplication {
         encodedPassword = String.format("%064x", new BigInteger(1, md.digest()));
 
         // DB에 저장
-        JdbcConnect jdbcConnect = new JdbcConnect();
-        boolean status = jdbcConnect.insertMember(name, employeeId, encodedPassword);
+        try{
+            JdbcConnect jdbcConnect = new JdbcConnect();
+            boolean status = jdbcConnect.insertMember(name, employeeId, encodedPassword);
 
-        if(status) {
-            System.out.println("등록되었습니다.");
+            if(status) {
+                System.out.println("등록되었습니다.");
+            }
+        } catch (Exception e){
+            System.out.println("오류가 발생했습니다. 문제가 반복되면 관리자에게 문의해주세요.");
         }
+
     }
 
     public static int loginPage() {
@@ -95,12 +100,16 @@ public class BankingApplication {
         encodedPassword = String.format("%064x", new BigInteger(1, md.digest()));
 
         // DB와 확인
-        JdbcConnect jdbcConnect = new JdbcConnect();
-        userId = jdbcConnect.selectMemberByEmployeeId(employeeId, encodedPassword);
-        // 사번, 비밀번호가 일치하고 승인 상태면 로그인 / 아니면 종료
+        try {
+            JdbcConnect jdbcConnect = new JdbcConnect();
+            userId = jdbcConnect.selectMemberByEmployeeId(employeeId, encodedPassword);
+            // 사번, 비밀번호가 일치하고 승인 상태면 로그인 / 아니면 종료
 
-        if(userId == -1){
-            System.out.println("로그인에 실패했습니다. 사번과 비밀번호를 확인해주세요.");
+            if(userId == -1){
+                System.out.println("로그인에 실패했습니다. 사번과 비밀번호를 확인해주세요.");
+            }
+        } catch (Exception e){
+            System.out.println("오류가 발생했습니다. 문제가 반복되면 관리자에게 문의해주세요.");
         }
         return userId;
     }
@@ -109,27 +118,48 @@ public class BankingApplication {
         Scanner scanner = new Scanner(System.in);
         int menu = -1;
         while(menu != 0){
+            String NJ = null;
             System.out.println("1. NJ 조회 2. NJ 충전 3. NJ 선물 0. 종료");
             menu = scanner.nextInt();
 
             if(menu == 1){
-                JdbcConnect jdbcConnect = new JdbcConnect();
-                System.out.println(jdbcConnect.selectBalanceByUserId(userId));
-
+                try {
+                    JdbcConnect jdbcConnect = new JdbcConnect();
+                    System.out.println(jdbcConnect.selectBalanceByUserId(userId));
+                } catch (Exception e){
+                    System.out.println("오류가 발생했습니다. 문제가 반복되면 관리자에게 문의해주세요.");
+                }
             } else if(menu == 2){
                 System.out.println("충전할 NJ를 입력해주세요.");
-                int charging;
-                charging = scanner.nextInt();
-                JdbcConnect jdbcConnect = new JdbcConnect();
-                jdbcConnect.updateBalanceByUserId(userId, charging);
-                System.out.println("충전이 완료되었습니다.");
+                NJ = scanner.next();
+                NJ.replaceAll("[^0-9]", "");
+                try {
+                    JdbcConnect jdbcConnect = new JdbcConnect();
+                    jdbcConnect.updateBalanceByUserId(userId, Integer.valueOf(NJ));
+                    System.out.println("충전이 완료되었습니다.");
+                } catch (Exception e){
+                    System.out.println("오류가 발생했습니다. 문제가 반복되면 관리자에게 문의해주세요.");
+                }
 
             } else if(menu == 3){
+                System.out.println("선물할 NJ를 입력해주세요.");
+                NJ = scanner.next();
+                NJ.replaceAll("[^0-9]", "");
 
-            } else if(menu == 4){
+                System.out.println("선물할 사원의 사번을 입력해주세요.");
+                String toEmployeeId = scanner.next();
 
-            } else {
+                try {
+                    JdbcConnect jdbcConnect = new JdbcConnect();
+                    if(jdbcConnect.transferByEmployeeId(userId, toEmployeeId, Integer.valueOf(NJ))){
+                        System.out.println("선물이 완료되었습니다.");
+                    } else {
+                        System.out.println("NJ가 부족합니다.");
+                    }
 
+                } catch (Exception e){
+                    System.out.println("오류가 발생했습니다. 문제가 반복되면 관리자에게 문의해주세요.");
+                }
             }
         }
     }
